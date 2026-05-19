@@ -1,4 +1,5 @@
-
+<!doctype html>
+<meta charset="utf-8">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--font-sans,'system-ui');font-size:14px;color:var(--color-text-primary,#1a1a1a);background:var(--color-background-tertiary,#f5f5f0)}
@@ -80,6 +81,22 @@ textarea{resize:vertical;min-height:56px}
 mark{background:#FAEEDA;color:#633806;border-radius:2px;padding:0 1px}
 .chip-section{margin-bottom:4px}
 .temp-group{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.voice-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.voice-input{min-height:66px;margin-bottom:10px}
+.voice-results{display:none;margin-top:10px}
+.voice-results.show{display:block}
+.voice-card-item{border:0.5px solid #ddd;border-radius:10px;padding:12px;margin-top:8px;background:#f8f8f5}
+.voice-card-item.warn{border-color:#F09595;background:#FFF8F8}
+.voice-card-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:8px}
+.voice-card-title{font-size:13px;font-weight:600;color:#27500A}
+.voice-card-meta{font-size:11px;color:#888;line-height:1.7}
+.voice-warning{font-size:11px;color:#A32D2D;margin-top:6px}
+.voice-select{margin-top:6px}
+.voice-tips{font-size:11px;color:#888;line-height:1.7;background:#f8f8f5;border:0.5px solid #eee;border-radius:8px;padding:9px 10px;margin-bottom:10px}
+.voice-tips b{color:#555;font-weight:500}
+.voice-samples{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.voice-sample{border:0.5px solid #ddd;background:#fff;color:#666;border-radius:20px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit}
+.voice-sample:hover{border-color:#97C459;color:#27500A;background:#F8FBF3}
 </style>
 
 <h2 class="sr-only">养花养多肉日志工具</h2>
@@ -94,6 +111,25 @@ mark{background:#FAEEDA;color:#633806;border-radius:2px;padding:0 1px}
   <!-- 记录 -->
   <div id="tab-log">
     <div class="sbar"><div class="sdot" id="sdot"></div><span id="stext">正在检测存储…</span></div>
+    <div class="card">
+      <div class="field-label">语音快速记录</div>
+      <div class="voice-actions">
+        <button class="btn primary" id="voice-start" onclick="startVoice()"><i class="ti ti-microphone" aria-hidden="true" style="font-size:13px;margin-right:4px"></i>开始语音</button>
+        <button class="btn" id="voice-stop" onclick="stopVoice()" disabled>停止</button>
+        <button class="btn" onclick="applyVoiceFixes()">纠错</button>
+        <button class="btn" onclick="parseVoiceText()">解析</button>
+        <button class="btn" onclick="clearVoice()">清空</button>
+      </div>
+      <div class="voice-samples">
+        <button class="voice-sample" onclick="useVoiceSample('今天晴天二十多度，月季浇水')">单条示例</button>
+        <button class="voice-sample" onclick="useVoiceSample('今天晴天二十多度，给月季浇水，给紫乐老桩施肥')">多条示例</button>
+        <button class="voice-sample" onclick="useVoiceSample('昨天阴天，金钱树叶片发黄，纯观察')">补记示例</button>
+      </div>
+      <div class="voice-tips"><b>建议说法：</b>尽量短句分段，说“植物名 + 操作/状态 + 天气温度”。植物名总识别错时，到「我的花」给它加语音别名。</div>
+      <textarea class="voice-input" id="voice-text" placeholder="也可以直接输入：今天晴天二十多度，给月季浇水，给紫乐老桩施肥"></textarea>
+      <div class="toast ok" id="voice-msg"></div>
+      <div class="voice-results" id="voice-results"></div>
+    </div>
     <div class="card">
       <div class="row2">
         <div><div class="field-label">选择植物</div><select id="log-plant"></select></div>
@@ -226,6 +262,10 @@ mark{background:#FAEEDA;color:#633806;border-radius:2px;padding:0 1px}
         <div><div class="field-label">科属归属</div><input type="text" id="np-family" list="taxonomy-list" placeholder="例：木犀科" oninput="markTaxonomyManual(this)"></div>
         <div><div class="field-label">开始养育时间</div><input type="date" id="np-date"></div>
       </div>
+      <div class="field">
+        <div class="field-label">语音别名（逗号分隔）</div>
+        <input type="text" id="np-aliases" placeholder="例：紫乐、紫乐老庄、子乐">
+      </div>
       <div class="row2">
         <div><div class="field-label">土壤配方</div><input type="text" id="np-soil" placeholder="例：椰糠为主"></div>
         <div><div class="field-label">花盆类型</div><input type="text" id="np-pot" placeholder="例：加仑盆"></div>
@@ -276,6 +316,10 @@ mark{background:#FAEEDA;color:#633806;border-radius:2px;padding:0 1px}
     <div class="row2">
       <div><div class="field-label">科属归属</div><input type="text" id="ep-family" list="taxonomy-list" oninput="markTaxonomyManual(this)"></div>
       <div><div class="field-label">开始养育时间</div><input type="date" id="ep-since"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">语音别名（逗号分隔）</div>
+      <input type="text" id="ep-aliases" placeholder="例：紫乐、紫乐老庄、子乐">
     </div>
     <div class="row2">
       <div><div class="field-label">土壤配方</div><input type="text" id="ep-soil"></div>
@@ -395,6 +439,7 @@ const store=(()=>{
 
 let plants=[],logs=[],selOps=[],selSt=[],selFert=[],selWeather='',selTemp='',curFilter='all',searchKw='';
 let editOps=[],editSt=[],editFert=[],editWeather='',editTemp='';
+let voiceItems=[],voiceRec=null;
 
 const TAXONOMY={
   '紫乐老桩':'景天科','丸叶松绿':'景天科','昂斯洛':'景天科','蒂比':'景天科','红颜蜜语':'景天科','红东云':'景天科','静夜':'景天科','紫珍珠':'景天科','剑司诺娃':'景天科','赫拉':'景天科','姬红花月':'景天科','蓝姬莲':'景天科','山地玫瑰':'景天科',
@@ -416,6 +461,7 @@ const TAXONOMY={
 };
 
 function normPlantName(s){return(s||'').replace(/[（）()\s]/g,'');}
+function splitAliases(s){return String(s||'').split(/[、,，;；\s]+/).map(x=>x.trim()).filter(Boolean);}
 function guessTaxonomy(name){
   const n=normPlantName(name);
   if(!n)return'';
@@ -429,6 +475,226 @@ function fillTaxonomy(prefix){
   if(t&&(!input.value.trim()||input.dataset.auto==='1')){input.value=t;input.dataset.auto='1';}
 }
 function markTaxonomyManual(input){input.dataset.auto=input.value.trim()?'0':'1';}
+
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function localDate(offset){
+  const d=new Date();d.setDate(d.getDate()+offset);
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function uniq(a){return[...new Set((a||[]).filter(Boolean))];}
+
+const VOICE_FIXES=[
+  [/紫[了勒乐]老[庄桩]/g,'紫乐老桩'],
+  [/子乐老[庄桩]/g,'紫乐老桩'],
+  [/月记|越季|月季花/g,'月季'],
+  [/金钱数|金钱数儿/g,'金钱树'],
+  [/茉莉华/g,'茉莉花'],
+  [/花多多一号/g,'花多多1号'],
+  [/林雨/g,'淋雨'],
+  [/焦尖焦变/g,'焦尖焦边'],
+  [/叶片发软了/g,'叶片发软']
+];
+
+function getPlantVoiceNames(p){
+  return uniq([p.name,...splitAliases(p.aliases),normPlantName(p.name).replace(/老桩|盆栽|花$/g,'')].filter(x=>x&&x.length>1));
+}
+function normalizeVoiceText(text){
+  let out=text||'';
+  VOICE_FIXES.forEach(([re,v])=>out=out.replace(re,v));
+  plants.forEach(p=>{
+    splitAliases(p.aliases).forEach(a=>{
+      if(a&&a!==p.name)out=out.replaceAll(a,p.name);
+    });
+  });
+  return out.replace(/\s+/g,' ').trim();
+}
+function applyVoiceFixes(){
+  const input=document.getElementById('voice-text'),before=input.value.trim(),after=normalizeVoiceText(before);
+  input.value=after;
+  toast('voice-msg',before&&before!==after?'已应用本地纠错词和植物别名':'没有发现需要纠正的文字',before===after?false:true);
+}
+function useVoiceSample(text){
+  document.getElementById('voice-text').value=text;
+  parseVoiceText();
+}
+
+function startVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('voice-msg','当前浏览器不支持语音识别，可直接输入文字后解析',false);return;}
+  stopVoice();
+  voiceRec=new SR();
+  voiceRec.lang='zh-CN';voiceRec.continuous=true;voiceRec.interimResults=true;
+  let fixed=document.getElementById('voice-text').value.trim();
+  voiceRec.onresult=e=>{
+    let live='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t=e.results[i][0].transcript;
+      if(e.results[i].isFinal)fixed+=(fixed?' ':'')+t;
+      else live+=t;
+    }
+    document.getElementById('voice-text').value=(fixed+(live?' '+live:'')).trim();
+  };
+  voiceRec.onerror=()=>toast('voice-msg','语音识别中断，可重试或手动输入',false);
+  voiceRec.onend=()=>{document.getElementById('voice-start').disabled=false;document.getElementById('voice-stop').disabled=true;};
+  voiceRec.start();
+  document.getElementById('voice-start').disabled=true;
+  document.getElementById('voice-stop').disabled=false;
+  toast('voice-msg','正在听写…说完后点停止或直接解析',true);
+}
+function stopVoice(){
+  if(voiceRec){try{voiceRec.stop();}catch(e){}voiceRec=null;}
+  const start=document.getElementById('voice-start'),stop=document.getElementById('voice-stop');
+  if(start)start.disabled=false;if(stop)stop.disabled=true;
+}
+function clearVoice(){
+  stopVoice();voiceItems=[];
+  document.getElementById('voice-text').value='';
+  document.getElementById('voice-results').className='voice-results';
+  document.getElementById('voice-results').innerHTML='';
+  toast('voice-msg','',true);
+}
+
+function parseDateText(text){
+  if(/前天/.test(text))return localDate(-2);
+  if(/昨天|昨日/.test(text))return localDate(-1);
+  const m=text.match(/(\d{1,2})[月/.-](\d{1,2})[日号]?/);
+  if(m){const d=new Date(),y=d.getFullYear();return `${y}-${String(m[1]).padStart(2,'0')}-${String(m[2]).padStart(2,'0')}`;}
+  return localDate(0);
+}
+function parseWeatherText(text){
+  if(/梅雨/.test(text))return'梅雨季';
+  if(/下雨|雨天|雨了|淋雨/.test(text))return'下雨';
+  if(/阴天|阴/.test(text))return'阴天';
+  if(/晴天|晴|太阳/.test(text))return'晴天';
+  return'';
+}
+function parseTempText(text){
+  if(/高温|三十五度以上|35度以上|35°以上|35\+|35度\+/.test(text))return'高温35°+';
+  if(/三十.*三十五|30.*35|三十多度|30多度/.test(text))return'30～35°';
+  if(/二十.*三十|20.*30|二十多度|20多度|二十几度|20几度/.test(text))return'20～30°';
+  if(/十.*二十|10.*20|十几度|10多度/.test(text))return'10～20°';
+  if(/零.*十|0.*10|十度以下|10度以下/.test(text))return'0～10°';
+  return'';
+}
+function parseOpsText(text){
+  const ops=[];
+  if(/浇水|浇透|补水|灌水/.test(text))ops.push('浇水');
+  if(/施肥|追肥|肥料|上肥|给肥/.test(text))ops.push('施肥');
+  if(/换盆|换土|换盆换土/.test(text))ops.push('换盆换土');
+  if(/修剪|剪枝|剪叶|打顶|摘心/.test(text))ops.push('修剪');
+  if(/淋雨/.test(text))ops.push('淋雨');
+  if(/观察|看了看|检查/.test(text))ops.push('纯观察');
+  return uniq(ops);
+}
+function parseFertsText(text){
+  return ['磷酸二氢钾','水溶性肥','复合肥','有机肥','尿素','硫酸亚铁','花多多1号','生根粉'].filter(f=>text.includes(f));
+}
+function parseStatusesText(text){
+  const st=[];
+  if(/状态正常|正常|挺好|很好|健康/.test(text))st.push('状态正常');
+  if(/黄叶|叶片发黄|发黄/.test(text))st.push('叶片发黄');
+  if(/发软|叶片发软|软了/.test(text))st.push('叶片发软');
+  if(/焦尖|焦边|焦了/.test(text))st.push('焦尖焦边');
+  if(/掉叶|掉叶子|落叶/.test(text))st.push('掉叶');
+  if(/化水|腐烂|烂了|黑腐/.test(text))st.push('化水腐烂');
+  if(/徒长/.test(text))st.push('徒长');
+  if(/虫|虫子|虫害|蚜虫|红蜘蛛|介壳虫/.test(text))st.push('发现虫子');
+  if(/开花/.test(text))st.push('开花了');
+  if(/新芽|冒芽|发芽|长芽/.test(text))st.push('新芽冒出');
+  return uniq(st);
+}
+function findVoicePlants(text){
+  const nText=normPlantName(text);
+  const hits=[];
+  plants.forEach(p=>{
+    getPlantVoiceNames(p).forEach(name=>{
+      const n=normPlantName(name);
+      if(!n)return;
+      const i=nText.indexOf(n);
+      if(i>=0)hits.push({plant:p,index:i,len:n.length,matched:name});
+    });
+  });
+  return hits.sort((a,b)=>a.index-b.index||b.len-a.len).filter((hit,i,arr)=>arr.findIndex(x=>x.plant.id===hit.plant.id)===i);
+}
+function parseVoiceText(){
+  const raw=document.getElementById('voice-text').value.trim();
+  const text=normalizeVoiceText(raw);
+  if(!raw){toast('voice-msg','先说一句或输入一句养护记录',false);return;}
+  if(text!==raw)document.getElementById('voice-text').value=text;
+  const date=parseDateText(text),weather=parseWeatherText(text),temp=parseTempText(text);
+  const globalOps=parseOpsText(text),globalFerts=parseFertsText(text),globalSt=parseStatusesText(text);
+  const found=findVoicePlants(text);
+  if(!plants.length){voiceItems=[];renderVoiceResults(text,[{warn:'请先在「我的花」添加植物，再保存语音记录'}]);return;}
+  if(!found.length){
+    voiceItems=[{plantId:'',date,ops:globalOps,weather,temp,ferts:globalFerts,statuses:globalSt,note:'语音：'+raw+(text!==raw?'\n纠错后：'+text:''),warn:'没有匹配到已有植物，请手动选择'}];
+  }else{
+    voiceItems=found.map((m,i)=>{
+      const next=found[i+1]?found[i+1].index:normPlantName(text).length;
+      const seg=normPlantName(text).slice(m.index,next);
+      return {
+        plantId:m.plant.id,date,weather,temp,
+        ops:parseOpsText(seg).length?parseOpsText(seg):globalOps,
+        ferts:parseFertsText(seg).length?parseFertsText(seg):globalFerts,
+        statuses:parseStatusesText(seg).length?parseStatusesText(seg):globalSt,
+        note:'语音：'+raw+(text!==raw?'\n纠错后：'+text:''),
+        warn:''
+      };
+    });
+  }
+  voiceItems.forEach(it=>{if(!it.ops.length&&!it.statuses.length)it.warn='未识别到操作或状态，可先编辑原文再解析';});
+  renderVoiceResults(text);
+  toast('voice-msg',`已解析 ${voiceItems.length} 条待保存记录`,true);
+}
+function renderVoiceResults(raw,override){
+  const box=document.getElementById('voice-results');
+  const items=override||voiceItems;
+  if(!items.length){box.className='voice-results';box.innerHTML='';return;}
+  const plantOptions=plants.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  box.className='voice-results show';
+  box.innerHTML=`<div class="field-label">待确认记录</div>${items.map((it,i)=>{
+    const p=plants.find(x=>x.id===it.plantId);
+    const tags=[...(it.ops||[]),it.weather,it.temp,...(it.ferts||[]),...(it.statuses||[])].filter(Boolean);
+    return `<div class="voice-card-item ${it.warn?'warn':''}">
+      <div class="voice-card-head">
+        <div>
+          <div class="voice-card-title">${p?esc(p.name):'未选择植物'}</div>
+          <div class="voice-card-meta">${it.date||''}${tags.length?' · '+tags.map(esc).join(' · '):''}</div>
+          ${it.warn?`<div class="voice-warning">${esc(it.warn)}</div>`:''}
+        </div>
+        ${override?'':`<button class="btn sm danger" onclick="removeVoiceItem(${i})">删除</button>`}
+      </div>
+      ${override?'':`<select class="voice-select" onchange="voiceItems[${i}].plantId=this.value;renderVoiceResults()"><option value="">选择植物</option>${plantOptions}</select>`}
+    </div>`;
+  }).join('')}${override?'':`<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button class="btn" onclick="fillFirstVoiceItem()">填入表单</button><button class="btn primary" onclick="saveVoiceItems()">全部保存</button></div>`}`;
+  if(!override)voiceItems.forEach((it,i)=>{const s=box.querySelectorAll('select')[i];if(s)s.value=it.plantId||'';});
+}
+function removeVoiceItem(i){voiceItems.splice(i,1);renderVoiceResults();toast('voice-msg',voiceItems.length?`剩余 ${voiceItems.length} 条待保存记录`:'已清空待保存记录',true);}
+function fillFirstVoiceItem(){
+  const it=voiceItems[0];if(!it){toast('voice-msg','没有可填入的记录',false);return;}
+  if(!it.plantId){toast('voice-msg','请先选择植物',false);return;}
+  document.getElementById('log-plant').value=it.plantId;
+  document.getElementById('log-date').value=it.date;
+  clearForm();
+  selOps=[...(it.ops||[])];selFert=[...(it.ferts||[])];selSt=[...(it.statuses||[])];selWeather=it.weather||'';selTemp=it.temp||'';
+  document.querySelectorAll('#tab-log .chip').forEach(b=>{
+    const v=b.dataset.v,cls=b.dataset.cls;
+    if(selOps.includes(v)||selFert.includes(v)||selSt.includes(v)||selWeather===v||selTemp===v)b.className='chip '+cls;
+  });
+  document.getElementById('log-note').value=it.note||'';
+  toast('voice-msg','已填入第一条记录，可继续手动调整后保存',true);
+}
+async function saveVoiceItems(){
+  if(!voiceItems.length){toast('voice-msg','没有待保存记录',false);return;}
+  const bad=voiceItems.find(it=>!it.plantId||(!it.ops.length&&!it.statuses.length));
+  if(bad){toast('voice-msg','还有记录缺少植物或操作/状态，请先处理',false);return;}
+  const stamp=Date.now();
+  const newLogs=voiceItems.map((it,i)=>({id:String(stamp+i),plantId:it.plantId,date:it.date,ops:[...it.ops],weather:it.weather,temp:it.temp,ferts:[...it.ferts],statuses:[...it.statuses],note:it.note||''}));
+  logs=[...newLogs,...logs];
+  const ok=await persist();
+  if(ok){const n=voiceItems.length;voiceItems=[];renderVoiceResults();renderHistory();toast('voice-msg',`已保存 ${n} 条语音记录 ✓`,true);}
+  else{logs=logs.slice(newLogs.length);toast('voice-msg','保存失败，请重试',false);}
+}
 
 async function load(){
   const mode=await store.init();
@@ -594,9 +860,10 @@ async function addPlant(){
   const name=document.getElementById('np-name').value.trim();
   if(!name){toast('plant-msg','请填写植物名称',false);return;}
   const family=document.getElementById('np-family').value.trim()||guessTaxonomy(name);
-  plants.push({id:Date.now().toString(),name,type:document.getElementById('np-type').value,family,soil:document.getElementById('np-soil').value.trim(),pot:document.getElementById('np-pot').value.trim(),since:document.getElementById('np-date').value});
+  const aliases=splitAliases(document.getElementById('np-aliases').value).join('、');
+  plants.push({id:Date.now().toString(),name,type:document.getElementById('np-type').value,family,aliases,soil:document.getElementById('np-soil').value.trim(),pot:document.getElementById('np-pot').value.trim(),since:document.getElementById('np-date').value});
   const ok=await persist();
-  if(ok){document.getElementById('np-name').value='';document.getElementById('np-family').value='';document.getElementById('np-family').dataset.auto='1';document.getElementById('np-soil').value='';document.getElementById('np-pot').value='';toast('plant-msg','已添加 '+name+' ✓',true);refreshSelects();renderPlants();}
+  if(ok){document.getElementById('np-name').value='';document.getElementById('np-family').value='';document.getElementById('np-family').dataset.auto='1';document.getElementById('np-aliases').value='';document.getElementById('np-soil').value='';document.getElementById('np-pot').value='';toast('plant-msg','已添加 '+name+' ✓',true);refreshSelects();renderPlants();}
   else{plants.pop();toast('plant-msg','保存失败，请重试',false);}
 }
 
@@ -609,6 +876,7 @@ function openEditPlant(id){
   document.getElementById('ep-type').value=p.type;
   document.getElementById('ep-family').value=p.family||guessTaxonomy(p.name)||'';
   document.getElementById('ep-family').dataset.auto=p.family?'0':'1';
+  document.getElementById('ep-aliases').value=p.aliases||'';
   document.getElementById('ep-soil').value=p.soil||'';
   document.getElementById('ep-pot').value=p.pot||'';
   document.getElementById('ep-since').value=p.since||'';
@@ -621,7 +889,8 @@ async function savePlantEdit(){
   const name=document.getElementById('ep-name').value.trim();
   if(!name){alert('植物名称不能为空');return;}
   const family=document.getElementById('ep-family').value.trim()||guessTaxonomy(name);
-  plants[idx]={...plants[idx],name,type:document.getElementById('ep-type').value,family,soil:document.getElementById('ep-soil').value.trim(),pot:document.getElementById('ep-pot').value.trim(),since:document.getElementById('ep-since').value};
+  const aliases=splitAliases(document.getElementById('ep-aliases').value).join('、');
+  plants[idx]={...plants[idx],name,type:document.getElementById('ep-type').value,family,aliases,soil:document.getElementById('ep-soil').value.trim(),pot:document.getElementById('ep-pot').value.trim(),since:document.getElementById('ep-since').value};
   const ok=await persist();
   if(ok){closeModal('modal-plant');refreshSelects();renderPlants();toast('plant-msg','已更新 ✓',true);}
   else toast('plant-msg','保存失败',false);
@@ -636,6 +905,7 @@ function renderPlants(){
       <div>
         <div style="font-weight:500;font-size:14px">${p.name}<span style="font-size:11px;color:#888;margin-left:6px;font-weight:400">${p.type}</span></div>
         ${p.family||guessTaxonomy(p.name)?`<div style="font-size:11px;color:#3B6D11">科属：${p.family||guessTaxonomy(p.name)}</div>`:''}
+        ${p.aliases?`<div style="font-size:11px;color:#888">语音别名：${p.aliases}</div>`:''}
         ${p.since?`<div style="font-size:11px;color:#888">养育自 ${p.since}</div>`:''}
         ${p.soil?`<div style="font-size:11px;color:#888">土：${p.soil}${p.pot?' · 盆：'+p.pot:''}</div>`:''}
       </div>
