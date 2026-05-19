@@ -1,0 +1,727 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans,'system-ui');font-size:14px;color:var(--color-text-primary,#1a1a1a);background:var(--color-background-tertiary,#f5f5f0)}
+.app{padding:16px}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:12px;border:0.5px solid var(--color-border-tertiary,#ddd);background:var(--color-background-primary,#fff);cursor:pointer;color:var(--color-text-secondary,#666);font-size:11px;transition:all 0.15s}
+.nav-btn i{font-size:20px}
+.nav-btn.active{background:#EAF3DE;color:#27500A;border-color:#97C459}
+.nav-btn:hover:not(.active){background:#f5f5f0}
+.card{background:var(--color-background-primary,#fff);border:0.5px solid var(--color-border-tertiary,#ddd);border-radius:12px;padding:16px;margin-bottom:12px}
+.field-label{font-size:11px;font-weight:500;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.field{margin-bottom:14px}
+input,select,textarea{width:100%;font-family:inherit;font-size:13px;border:0.5px solid #ccc;border-radius:8px;padding:7px 10px;background:var(--color-background-primary,#fff);color:var(--color-text-primary,#1a1a1a)}
+textarea{resize:vertical;min-height:56px}
+.chip-group{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:6px 11px;border-radius:20px;border:1.5px solid #e0e0e0;background:#fff;cursor:pointer;font-size:12px;color:#666;transition:all 0.15s;user-select:none;font-family:inherit}
+.chip:hover{border-color:#aaa;color:#333}
+.chip.sel-green{background:#EAF3DE;border-color:#639922;color:#27500A;font-weight:500}
+.chip.sel-blue{background:#E6F1FB;border-color:#378ADD;color:#0C447C;font-weight:500}
+.chip.sel-amber{background:#FAEEDA;border-color:#EF9F27;color:#633806;font-weight:500}
+.chip.sel-red{background:#FCEBEB;border-color:#E24B4A;color:#791F1F;font-weight:500}
+.chip.sel-teal{background:#E1F5EE;border-color:#1D9E75;color:#085041;font-weight:500}
+.chip.sel-purple{background:#EEEDFE;border-color:#7C6FF7;color:#3B35A8;font-weight:500}
+.chip.sel-gray{background:#F1EFE8;border-color:#999;color:#444;font-weight:500}
+.chip i{font-size:13px}
+.btn{cursor:pointer;font-family:inherit;font-size:13px;padding:8px 16px;border-radius:8px;border:0.5px solid #ccc;background:transparent;color:#1a1a1a;transition:background 0.1s}
+.btn:hover{background:#f5f5f0}
+.btn:active{transform:scale(0.97)}
+.btn.primary{background:#27500A;color:#EAF3DE;border-color:#27500A}
+.btn.primary:hover{background:#3B6D11}
+.btn.sm{font-size:11px;padding:4px 10px}
+.btn.danger{color:#A32D2D;border-color:#F09595}
+.btn.danger:hover{background:#FCEBEB}
+.btn.edit{color:#185FA5;border-color:#B5D4F4}
+.btn.edit:hover{background:#E6F1FB}
+.btn.export{color:#185FA5;border-color:#B5D4F4}
+.btn.export:hover{background:#E6F1FB}
+.toast{font-size:12px;line-height:32px;min-height:20px}
+.toast.ok{color:#3B6D11}
+.toast.err{color:#A32D2D}
+.entry{border-bottom:0.5px solid #eee;padding:12px 0}
+.entry:last-child{border-bottom:none;padding-bottom:0}
+.tag{display:inline-flex;align-items:center;font-size:11px;padding:3px 8px;border-radius:20px;margin:2px}
+.tag.water{background:#E1F5EE;color:#0F6E56}
+.tag.fert{background:#FAEEDA;color:#854F0B}
+.tag.repot{background:#EEEDFE;color:#534AB7}
+.tag.obs{background:#F1EFE8;color:#5F5E5A}
+.tag.alert{background:#FCEBEB;color:#A32D2D}
+.tag.good{background:#EAF3DE;color:#3B6D11}
+.tag.weather{background:#E6F1FB;color:#185FA5}
+.tag.ftype{background:#FDF4FF;color:#7C3FA8}
+.empty{text-align:center;padding:2.5rem 1rem;color:#aaa;font-size:13px}
+.empty i{font-size:32px;display:block;margin-bottom:8px;opacity:0.4}
+.prompt-output{background:#f8f8f5;border:0.5px solid #ddd;border-radius:8px;padding:14px;font-size:12px;line-height:1.8;white-space:pre-wrap;margin-top:10px}
+.plant-row{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:0.5px solid #eee}
+.plant-row:last-child{border-bottom:none}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.filter-btn{padding:5px 12px;border-radius:20px;border:0.5px solid #ddd;background:#fff;cursor:pointer;font-size:12px;color:#888;font-family:inherit}
+.filter-btn.active{background:#27500A;color:#EAF3DE;border-color:#27500A}
+.search-wrap{position:relative;margin-bottom:12px}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:15px;color:#aaa;pointer-events:none}
+.search-wrap input{padding-left:32px;padding-right:32px}
+.search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#aaa;font-size:15px;padding:2px;display:none}
+.search-clear.show{display:block}
+.rc{font-size:11px;color:#aaa;margin-bottom:8px}
+.sbar{display:flex;align-items:center;gap:8px;font-size:11px;color:#888;padding:8px 12px;background:#f5f5f0;border-radius:8px;margin-bottom:12px;border:0.5px solid #eee}
+.sdot{width:7px;height:7px;border-radius:50%;background:#97C459;flex-shrink:0}
+.sdot.err{background:#E24B4A}
+.sdot.warn{background:#EF9F27}
+.export-box{background:#f8f8f5;border:0.5px solid #ddd;border-radius:10px;padding:14px;margin-top:12px}
+.export-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid #eee}
+.export-row:last-child{border-bottom:none;padding-bottom:0}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:16px;padding:20px;width:calc(100% - 32px);max-width:420px;max-height:80vh;overflow-y:auto}
+.modal h3{font-size:15px;font-weight:600;margin-bottom:16px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+mark{background:#FAEEDA;color:#633806;border-radius:2px;padding:0 1px}
+.chip-section{margin-bottom:4px}
+.temp-group{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+</style>
+
+<h2 class="sr-only">养花养多肉日志工具</h2>
+<div class="app">
+  <div class="nav">
+    <button class="nav-btn active" onclick="sw('log',this)"><i class="ti ti-pencil" aria-hidden="true"></i>记录</button>
+    <button class="nav-btn" onclick="sw('history',this)"><i class="ti ti-clock" aria-hidden="true"></i>历史</button>
+    <button class="nav-btn" onclick="sw('prompt',this)"><i class="ti ti-message-2" aria-hidden="true"></i>问AI</button>
+    <button class="nav-btn" onclick="sw('plants',this)"><i class="ti ti-plant" aria-hidden="true"></i>我的花</button>
+  </div>
+
+  <!-- 记录 -->
+  <div id="tab-log">
+    <div class="sbar"><div class="sdot" id="sdot"></div><span id="stext">正在检测存储…</span></div>
+    <div class="card">
+      <div class="row2">
+        <div><div class="field-label">选择植物</div><select id="log-plant"></select></div>
+        <div><div class="field-label">日期</div><input type="date" id="log-date"></div>
+      </div>
+      <div class="field">
+        <div class="field-label">今天做了什么</div>
+        <div class="chip-group">
+          <button class="chip" data-v="浇水" data-cls="sel-blue" onclick="tog(this,'op')"><i class="ti ti-droplet" aria-hidden="true"></i>浇水</button>
+          <button class="chip" data-v="施肥" data-cls="sel-amber" onclick="tog(this,'op')"><i class="ti ti-flask" aria-hidden="true"></i>施肥</button>
+          <button class="chip" data-v="换盆换土" data-cls="sel-teal" onclick="tog(this,'op')"><i class="ti ti-bucket" aria-hidden="true"></i>换盆换土</button>
+          <button class="chip" data-v="修剪" data-cls="sel-green" onclick="tog(this,'op')"><i class="ti ti-cut" aria-hidden="true"></i>修剪</button>
+          <button class="chip" data-v="淋雨" data-cls="sel-blue" onclick="tog(this,'op')"><i class="ti ti-cloud-rain" aria-hidden="true"></i>淋雨</button>
+          <button class="chip" data-v="纯观察" data-cls="sel-teal" onclick="tog(this,'op')"><i class="ti ti-eye" aria-hidden="true"></i>纯观察</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">天气状况</div>
+        <div class="chip-group" style="margin-bottom:6px">
+          <button class="chip" data-v="晴天" data-cls="sel-amber" data-single="w" onclick="togS(this)"><i class="ti ti-sun" aria-hidden="true"></i>晴天</button>
+          <button class="chip" data-v="阴天" data-cls="sel-gray" data-single="w" onclick="togS(this)"><i class="ti ti-cloud" aria-hidden="true"></i>阴天</button>
+          <button class="chip" data-v="下雨" data-cls="sel-blue" data-single="w" onclick="togS(this)"><i class="ti ti-cloud-rain" aria-hidden="true"></i>下雨</button>
+          <button class="chip" data-v="梅雨季" data-cls="sel-teal" data-single="w" onclick="togS(this)"><i class="ti ti-droplets" aria-hidden="true"></i>梅雨季</button>
+        </div>
+        <div class="field-label" style="margin-top:4px">温度范围</div>
+        <div class="chip-group">
+          <button class="chip" data-v="0～10°" data-cls="sel-blue" data-single="t" onclick="togS(this)"><i class="ti ti-snowflake" aria-hidden="true"></i>0～10°</button>
+          <button class="chip" data-v="10～20°" data-cls="sel-teal" data-single="t" onclick="togS(this)"><i class="ti ti-temperature" aria-hidden="true"></i>10～20°</button>
+          <button class="chip" data-v="20～30°" data-cls="sel-green" data-single="t" onclick="togS(this)"><i class="ti ti-temperature" aria-hidden="true"></i>20～30°</button>
+          <button class="chip" data-v="30～35°" data-cls="sel-amber" data-single="t" onclick="togS(this)"><i class="ti ti-temperature" aria-hidden="true"></i>30～35°</button>
+          <button class="chip" data-v="高温35°+" data-cls="sel-red" data-single="t" onclick="togS(this)"><i class="ti ti-temperature" aria-hidden="true"></i>高温35°+</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">施肥种类（可多选）</div>
+        <div class="chip-group">
+          <button class="chip" data-v="磷酸二氢钾" data-cls="sel-purple" onclick="tog(this,'fert')">磷酸二氢钾</button>
+          <button class="chip" data-v="水溶性肥" data-cls="sel-purple" onclick="tog(this,'fert')">水溶性肥</button>
+          <button class="chip" data-v="复合肥" data-cls="sel-purple" onclick="tog(this,'fert')">复合肥</button>
+          <button class="chip" data-v="有机肥" data-cls="sel-purple" onclick="tog(this,'fert')">有机肥</button>
+          <button class="chip" data-v="尿素" data-cls="sel-purple" onclick="tog(this,'fert')">尿素</button>
+          <button class="chip" data-v="硫酸亚铁" data-cls="sel-purple" onclick="tog(this,'fert')">硫酸亚铁</button>
+          <button class="chip" data-v="花多多1号" data-cls="sel-purple" onclick="tog(this,'fert')">花多多1号</button>
+          <button class="chip" data-v="生根粉" data-cls="sel-purple" onclick="tog(this,'fert')">生根粉</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">植物状态观察</div>
+        <div class="chip-group">
+          <button class="chip" data-v="状态正常" data-cls="sel-green" onclick="tog(this,'st')"><i class="ti ti-check" aria-hidden="true"></i>状态正常</button>
+          <button class="chip" data-v="叶片发黄" data-cls="sel-amber" onclick="tog(this,'st')">叶片发黄</button>
+          <button class="chip" data-v="叶片发软" data-cls="sel-amber" onclick="tog(this,'st')">叶片发软</button>
+          <button class="chip" data-v="焦尖焦边" data-cls="sel-red" onclick="tog(this,'st')">焦尖焦边</button>
+          <button class="chip" data-v="掉叶" data-cls="sel-amber" onclick="tog(this,'st')">掉叶</button>
+          <button class="chip" data-v="化水腐烂" data-cls="sel-red" onclick="tog(this,'st')">化水腐烂</button>
+          <button class="chip" data-v="徒长" data-cls="sel-teal" onclick="tog(this,'st')">徒长</button>
+          <button class="chip" data-v="发现虫子" data-cls="sel-red" onclick="tog(this,'st')"><i class="ti ti-bug" aria-hidden="true"></i>发现虫子</button>
+          <button class="chip" data-v="开花了" data-cls="sel-green" onclick="tog(this,'st')"><i class="ti ti-heart" aria-hidden="true"></i>开花了</button>
+          <button class="chip" data-v="新芽冒出" data-cls="sel-green" onclick="tog(this,'st')"><i class="ti ti-leaf" aria-hidden="true"></i>新芽冒出</button>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">备注（用量、浓度等）</div>
+        <textarea id="log-note" placeholder="例：花多多1号稀释1000倍，浇透"></textarea>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="toast ok" id="save-msg"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="clearForm()">清空</button>
+          <button class="btn primary" id="save-btn" onclick="saveLog()"><i class="ti ti-check" aria-hidden="true" style="font-size:13px;margin-right:4px"></i>保存记录</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 历史 -->
+  <div id="tab-history" style="display:none">
+    <div class="search-wrap">
+      <i class="ti ti-search search-icon" aria-hidden="true"></i>
+      <input type="text" id="search-input" placeholder="搜索植物名、操作、状态、备注…" oninput="onSearch(this.value)">
+      <button class="search-clear" id="search-clear" onclick="clearSearch()"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="filter-row" id="filter-row"><button class="filter-btn active" onclick="setFilter(this,'all')">全部</button></div>
+    <div class="rc" id="rc"></div>
+    <div class="card" id="history-list"></div>
+  </div>
+
+  <!-- 问AI -->
+  <div id="tab-prompt" style="display:none">
+    <div class="card">
+      <div class="row2">
+        <div><div class="field-label">选择植物</div><select id="prompt-plant"></select></div>
+        <div><div class="field-label">调取最近记录</div>
+          <select id="prompt-days">
+            <option value="7">最近 7 天</option>
+            <option value="14">最近 14 天</option>
+            <option value="30">最近 30 天</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">当前症状（只填最主要的一种）</div>
+        <input type="text" id="prompt-symptom" placeholder="例：底部叶片发软，快化水了">
+      </div>
+      <button class="btn primary" onclick="genPrompt()" style="width:100%"><i class="ti ti-sparkles" aria-hidden="true" style="font-size:13px;margin-right:6px"></i>生成AI提问话术</button>
+      <div id="prompt-out" style="display:none">
+        <div class="prompt-output" id="prompt-text"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+          <button class="btn" onclick="copyPrompt()"><i class="ti ti-copy" aria-hidden="true" style="font-size:13px;margin-right:4px"></i>复制话术</button>
+          <span class="toast ok" id="copy-msg"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 我的花 -->
+  <div id="tab-plants" style="display:none">
+    <div class="card">
+      <div class="field-label" style="margin-bottom:10px">添加新植物</div>
+      <div class="row2">
+        <div><div class="field-label">植物名称</div><input type="text" id="np-name" placeholder="例：茉莉花" oninput="fillTaxonomy('np')"></div>
+        <div><div class="field-label">类型</div>
+          <select id="np-type"><option>开花植物</option><option>多肉</option><option>绿植</option><option>其他</option></select>
+        </div>
+      </div>
+      <div class="row2">
+        <div><div class="field-label">科属归属</div><input type="text" id="np-family" list="taxonomy-list" placeholder="例：木犀科" oninput="markTaxonomyManual(this)"></div>
+        <div><div class="field-label">开始养育时间</div><input type="date" id="np-date"></div>
+      </div>
+      <div class="row2">
+        <div><div class="field-label">土壤配方</div><input type="text" id="np-soil" placeholder="例：椰糠为主"></div>
+        <div><div class="field-label">花盆类型</div><input type="text" id="np-pot" placeholder="例：加仑盆"></div>
+      </div>
+      <button class="btn primary" onclick="addPlant()" style="width:100%"><i class="ti ti-plus" aria-hidden="true" style="font-size:13px;margin-right:4px"></i>添加植物</button>
+      <div class="toast ok" id="plant-msg" style="text-align:center;display:block;margin-top:8px"></div>
+    </div>
+    <div class="card" id="plants-list"></div>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <i class="ti ti-database-export" aria-hidden="true" style="font-size:16px;color:#185FA5"></i>
+        <span style="font-size:13px;font-weight:500">导出数据</span>
+      </div>
+      <div style="font-size:12px;color:#888;margin-bottom:12px">将所有记录下载到本地，用 Excel 打开可筛选排序</div>
+      <div class="export-box">
+        <div class="export-row">
+          <div><div style="font-size:13px;font-weight:500">养护日志 CSV</div><div style="font-size:11px;color:#888;margin-top:2px">每条记录一行，Excel 直接打开</div></div>
+          <button class="btn export" onclick="exportCSV()"><i class="ti ti-download" aria-hidden="true" style="font-size:13px;margin-right:4px"></i>下载 CSV</button>
+        </div>
+        <div class="export-row">
+          <div><div style="font-size:13px;font-weight:500">完整备份 JSON</div><div style="font-size:11px;color:#888;margin-top:2px">包含植物档案，可重新导入恢复</div></div>
+          <button class="btn export" onclick="exportJSON()"><i class="ti ti-download" aria-hidden="true" style="font-size:13px;margin-right:4px"></i>下载 JSON</button>
+        </div>
+        <div class="export-row">
+          <div><div style="font-size:13px;font-weight:500">导入备份</div><div style="font-size:11px;color:#888;margin-top:2px">从 JSON 文件恢复数据</div></div>
+          <label class="btn export" style="display:inline-flex;align-items:center;cursor:pointer">
+            <i class="ti ti-upload" aria-hidden="true" style="font-size:13px;margin-right:4px"></i>选择文件
+            <input type="file" accept=".json" onchange="importJSON(this)" style="display:none">
+          </label>
+        </div>
+      </div>
+      <div class="toast ok" id="export-msg" style="text-align:center;display:block;margin-top:8px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 编辑植物弹窗 -->
+<div class="modal-bg" id="modal-plant">
+  <div class="modal">
+    <h3>编辑植物信息</h3>
+    <input type="hidden" id="ep-id">
+    <div class="row2">
+      <div><div class="field-label">植物名称</div><input type="text" id="ep-name" oninput="fillTaxonomy('ep')"></div>
+      <div><div class="field-label">类型</div>
+        <select id="ep-type"><option>开花植物</option><option>多肉</option><option>绿植</option><option>其他</option></select>
+      </div>
+    </div>
+    <div class="row2">
+      <div><div class="field-label">科属归属</div><input type="text" id="ep-family" list="taxonomy-list" oninput="markTaxonomyManual(this)"></div>
+      <div><div class="field-label">开始养育时间</div><input type="date" id="ep-since"></div>
+    </div>
+    <div class="row2">
+      <div><div class="field-label">土壤配方</div><input type="text" id="ep-soil"></div>
+      <div><div class="field-label">花盆类型</div><input type="text" id="ep-pot"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-plant')">取消</button>
+      <button class="btn primary" onclick="savePlantEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<datalist id="taxonomy-list">
+  <option value="景天科">
+  <option value="景天科景天属">
+  <option value="景天科莲花掌属">
+  <option value="马齿苋科">
+  <option value="仙人掌科">
+  <option value="阿福花科">
+  <option value="蔷薇科">
+  <option value="菊科">
+  <option value="唇形科">
+  <option value="唇形科鞘蕊花属">
+  <option value="紫茉莉科">
+  <option value="木犀科">
+  <option value="天南星科">
+  <option value="兰科蕙兰属">
+  <option value="虎耳草科">
+  <option value="天门冬科">
+  <option value="漆树科">
+</datalist>
+
+<!-- 编辑记录弹窗 -->
+<div class="modal-bg" id="modal-log">
+  <div class="modal">
+    <h3>编辑养护记录</h3>
+    <input type="hidden" id="el-id">
+    <div class="row2">
+      <div><div class="field-label">植物</div><select id="el-plant"></select></div>
+      <div><div class="field-label">日期</div><input type="date" id="el-date"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">操作</div>
+      <div class="chip-group" id="el-ops-group">
+        <button class="chip" data-v="浇水" data-cls="sel-blue" onclick="togEdit(this,'eop')">浇水</button>
+        <button class="chip" data-v="施肥" data-cls="sel-amber" onclick="togEdit(this,'eop')">施肥</button>
+        <button class="chip" data-v="换盆换土" data-cls="sel-teal" onclick="togEdit(this,'eop')">换盆换土</button>
+        <button class="chip" data-v="修剪" data-cls="sel-green" onclick="togEdit(this,'eop')">修剪</button>
+        <button class="chip" data-v="淋雨" data-cls="sel-blue" onclick="togEdit(this,'eop')">淋雨</button>
+        <button class="chip" data-v="纯观察" data-cls="sel-teal" onclick="togEdit(this,'eop')">纯观察</button>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">天气</div>
+      <div class="chip-group" style="margin-bottom:6px">
+        <button class="chip" data-v="晴天" data-cls="sel-amber" data-single="ew" onclick="togEditS(this,'ew')">晴天</button>
+        <button class="chip" data-v="阴天" data-cls="sel-gray" data-single="ew" onclick="togEditS(this,'ew')">阴天</button>
+        <button class="chip" data-v="下雨" data-cls="sel-blue" data-single="ew" onclick="togEditS(this,'ew')">下雨</button>
+        <button class="chip" data-v="梅雨季" data-cls="sel-teal" data-single="ew" onclick="togEditS(this,'ew')">梅雨季</button>
+      </div>
+      <div class="chip-group">
+        <button class="chip" data-v="0～10°" data-cls="sel-blue" data-single="et" onclick="togEditS(this,'et')">0～10°</button>
+        <button class="chip" data-v="10～20°" data-cls="sel-teal" data-single="et" onclick="togEditS(this,'et')">10～20°</button>
+        <button class="chip" data-v="20～30°" data-cls="sel-green" data-single="et" onclick="togEditS(this,'et')">20～30°</button>
+        <button class="chip" data-v="30～35°" data-cls="sel-amber" data-single="et" onclick="togEditS(this,'et')">30～35°</button>
+        <button class="chip" data-v="高温35°+" data-cls="sel-red" data-single="et" onclick="togEditS(this,'et')">高温35°+</button>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">施肥种类</div>
+      <div class="chip-group" id="el-fert-group">
+        <button class="chip" data-v="磷酸二氢钾" data-cls="sel-purple" onclick="togEdit(this,'efert')">磷酸二氢钾</button>
+        <button class="chip" data-v="水溶性肥" data-cls="sel-purple" onclick="togEdit(this,'efert')">水溶性肥</button>
+        <button class="chip" data-v="复合肥" data-cls="sel-purple" onclick="togEdit(this,'efert')">复合肥</button>
+        <button class="chip" data-v="有机肥" data-cls="sel-purple" onclick="togEdit(this,'efert')">有机肥</button>
+        <button class="chip" data-v="尿素" data-cls="sel-purple" onclick="togEdit(this,'efert')">尿素</button>
+        <button class="chip" data-v="硫酸亚铁" data-cls="sel-purple" onclick="togEdit(this,'efert')">硫酸亚铁</button>
+        <button class="chip" data-v="花多多1号" data-cls="sel-purple" onclick="togEdit(this,'efert')">花多多1号</button>
+        <button class="chip" data-v="生根粉" data-cls="sel-purple" onclick="togEdit(this,'efert')">生根粉</button>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">状态观察</div>
+      <div class="chip-group" id="el-st-group">
+        <button class="chip" data-v="状态正常" data-cls="sel-green" onclick="togEdit(this,'est')">状态正常</button>
+        <button class="chip" data-v="叶片发黄" data-cls="sel-amber" onclick="togEdit(this,'est')">叶片发黄</button>
+        <button class="chip" data-v="叶片发软" data-cls="sel-amber" onclick="togEdit(this,'est')">叶片发软</button>
+        <button class="chip" data-v="焦尖焦边" data-cls="sel-red" onclick="togEdit(this,'est')">焦尖焦边</button>
+        <button class="chip" data-v="掉叶" data-cls="sel-amber" onclick="togEdit(this,'est')">掉叶</button>
+        <button class="chip" data-v="化水腐烂" data-cls="sel-red" onclick="togEdit(this,'est')">化水腐烂</button>
+        <button class="chip" data-v="徒长" data-cls="sel-teal" onclick="togEdit(this,'est')">徒长</button>
+        <button class="chip" data-v="发现虫子" data-cls="sel-red" onclick="togEdit(this,'est')">发现虫子</button>
+        <button class="chip" data-v="开花了" data-cls="sel-green" onclick="togEdit(this,'est')">开花了</button>
+        <button class="chip" data-v="新芽冒出" data-cls="sel-green" onclick="togEdit(this,'est')">新芽冒出</button>
+      </div>
+    </div>
+    <div><div class="field-label">备注</div><textarea id="el-note" placeholder="例：花多多1号稀释1000倍"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-log')">取消</button>
+      <button class="btn primary" onclick="saveLogEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const store=(()=>{
+  const cs=window.storage; let mode='unknown';
+  async function init(){
+    if(cs&&typeof cs.set==='function'){try{await cs.set('pj_ping','1');const r=await cs.get('pj_ping');if(r&&r.value==='1'){mode='cloud';return'cloud';}}catch(e){}}
+    try{localStorage.setItem('pj_ping','1');if(localStorage.getItem('pj_ping')==='1'){mode='local';return'local';}}catch(e){}
+    mode='none';return'none';
+  }
+  async function get(k){if(mode==='cloud'){try{const r=await cs.get(k);return r?r.value:null;}catch(e){return null;}}if(mode==='local')return localStorage.getItem(k);return null;}
+  async function set(k,v){if(mode==='cloud'){try{await cs.set(k,v);return true;}catch(e){return false;}}if(mode==='local'){try{localStorage.setItem(k,v);return true;}catch(e){return false;}}return false;}
+  return{init,get,set,getMode:()=>mode};
+})();
+
+let plants=[],logs=[],selOps=[],selSt=[],selFert=[],selWeather='',selTemp='',curFilter='all',searchKw='';
+let editOps=[],editSt=[],editFert=[],editWeather='',editTemp='';
+
+const TAXONOMY={
+  '紫乐老桩':'景天科','丸叶松绿':'景天科','昂斯洛':'景天科','蒂比':'景天科','红颜蜜语':'景天科','红东云':'景天科','静夜':'景天科','紫珍珠':'景天科','剑司诺娃':'景天科','赫拉':'景天科','姬红花月':'景天科','蓝姬莲':'景天科','山地玫瑰':'景天科',
+  '金叶佛甲草':'景天科景天属','花蝴蝶法师':'景天科莲花掌属',
+  '太阳花':'马齿苋科','吸财树':'马齿苋科','金枝玉叶':'马齿苋科',
+  '仙人球':'仙人掌科',
+  '库拉索芦荟':'阿福花科','黄金玉露':'阿福花科',
+  '月季':'蔷薇科',
+  '菊花':'菊科','千头菊':'菊科','荷兰菊':'菊科',
+  '迷迭香':'唇形科','碰碰香':'唇形科',
+  '金边彩叶草':'唇形科鞘蕊花属',
+  '三角梅':'紫茉莉科',
+  '茉莉花':'木犀科',
+  '金钱树':'天南星科','金钱':'天南星科',
+  '墨兰企黑':'兰科蕙兰属',
+  '多色矾根':'虎耳草科',
+  '文竹':'天门冬科',
+  '清香木':'漆树科'
+};
+
+function normPlantName(s){return(s||'').replace(/[（）()\s]/g,'');}
+function guessTaxonomy(name){
+  const n=normPlantName(name);
+  if(!n)return'';
+  if(TAXONOMY[n])return TAXONOMY[n];
+  const k=Object.keys(TAXONOMY).find(x=>n.includes(x)||x.includes(n));
+  return k?TAXONOMY[k]:'';
+}
+function fillTaxonomy(prefix){
+  const input=document.getElementById(prefix+'-family'),name=document.getElementById(prefix+'-name').value;
+  const t=guessTaxonomy(name);
+  if(t&&(!input.value.trim()||input.dataset.auto==='1')){input.value=t;input.dataset.auto='1';}
+}
+function markTaxonomyManual(input){input.dataset.auto=input.value.trim()?'0':'1';}
+
+async function load(){
+  const mode=await store.init();
+  const dot=document.getElementById('sdot'),stxt=document.getElementById('stext');
+  if(mode==='cloud'){dot.className='sdot';stxt.textContent='云端存储 · 数据绑定账号，换设备也能用';}
+  else if(mode==='local'){dot.className='sdot warn';stxt.textContent='本地存储 · 数据在此浏览器，清缓存会丢失';}
+  else{dot.className='sdot err';stxt.textContent='存储不可用 · 建议在 Claude.ai 中使用';}
+  try{const v=await store.get('pj_plants');if(v)plants=JSON.parse(v);}catch(e){plants=[];}
+  try{const v=await store.get('pj_logs');if(v)logs=JSON.parse(v);}catch(e){logs=[];}
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('log-date').value=today;
+  document.getElementById('np-date').value=today;
+  refreshSelects();renderPlants();renderHistory();
+}
+
+async function persist(){
+  const ok1=await store.set('pj_plants',JSON.stringify(plants));
+  const ok2=await store.set('pj_logs',JSON.stringify(logs));
+  return ok1&&ok2;
+}
+
+function refreshSelects(){
+  const o=plants.length?plants.map(p=>`<option value="${p.id}">${p.name}</option>`).join(''):'<option value="">先去「我的花」添加植物</option>';
+  ['log-plant','prompt-plant','el-plant'].forEach(id=>document.getElementById(id).innerHTML=o);
+  const extra=plants.map(p=>`<button class="filter-btn" onclick="setFilter(this,'${p.id}')">${p.name}</button>`).join('');
+  document.getElementById('filter-row').innerHTML=`<button class="filter-btn${curFilter==='all'?' active':''}" onclick="setFilter(this,'all')">全部</button>${extra}`;
+}
+
+// 主记录 chip 切换
+function tog(btn,type){
+  const v=btn.dataset.v,cls=btn.dataset.cls;
+  const arr=type==='op'?selOps:type==='fert'?selFert:selSt;
+  const i=arr.indexOf(v);
+  if(i>-1){arr.splice(i,1);btn.className='chip';}else{arr.push(v);btn.className='chip '+cls;}
+}
+function togS(btn){
+  const grp=btn.dataset.single;
+  document.querySelectorAll(`[data-single="${grp}"]`).forEach(b=>b.className='chip');
+  if(grp==='w'){if(selWeather===btn.dataset.v){selWeather='';}else{selWeather=btn.dataset.v;btn.className='chip '+btn.dataset.cls;}}
+  else{if(selTemp===btn.dataset.v){selTemp='';}else{selTemp=btn.dataset.v;btn.className='chip '+btn.dataset.cls;}}
+}
+
+// 编辑弹窗 chip 切换
+function togEdit(btn,type){
+  const v=btn.dataset.v,cls=btn.dataset.cls;
+  const arr=type==='eop'?editOps:type==='efert'?editFert:editSt;
+  const i=arr.indexOf(v);
+  if(i>-1){arr.splice(i,1);btn.className='chip';}else{arr.push(v);btn.className='chip '+cls;}
+}
+function togEditS(btn,grp){
+  document.querySelectorAll(`[data-single="${grp}"]`).forEach(b=>b.className='chip');
+  if(grp==='ew'){if(editWeather===btn.dataset.v){editWeather='';}else{editWeather=btn.dataset.v;btn.className='chip '+btn.dataset.cls;}}
+  else{if(editTemp===btn.dataset.v){editTemp='';}else{editTemp=btn.dataset.v;btn.className='chip '+btn.dataset.cls;}}
+}
+
+async function saveLog(){
+  const pid=document.getElementById('log-plant').value;
+  if(!pid||!plants.find(p=>p.id===pid)){toast('save-msg','请先在「我的花」添加植物',false);return;}
+  const btn=document.getElementById('save-btn');
+  btn.disabled=true;btn.textContent='保存中…';
+  logs.unshift({id:Date.now().toString(),plantId:pid,date:document.getElementById('log-date').value,ops:[...selOps],weather:selWeather,temp:selTemp,ferts:[...selFert],statuses:[...selSt],note:document.getElementById('log-note').value.trim()});
+  const ok=await persist();
+  btn.disabled=false;btn.innerHTML='<i class="ti ti-check" style="font-size:13px;margin-right:4px"></i>保存记录';
+  if(ok){clearForm();toast('save-msg','记录已保存 ✓',true);renderHistory();}
+  else{logs.shift();toast('save-msg','保存失败，请重试',false);}
+}
+
+function clearForm(){
+  selOps=[];selSt=[];selFert=[];selWeather='';selTemp='';
+  document.querySelectorAll('#tab-log .chip').forEach(b=>b.className='chip');
+  document.getElementById('log-note').value='';
+}
+
+async function deleteLog(id){logs=logs.filter(l=>l.id!==id);await persist();renderHistory();}
+
+// 编辑记录
+function openEditLog(id){
+  const l=logs.find(x=>x.id===id);if(!l)return;
+  editOps=[...(l.ops||[])];editSt=[...(l.statuses||[])];editFert=[...(l.ferts||[])];
+  editWeather=l.weather||'';editTemp=l.temp||'';
+  document.getElementById('el-id').value=id;
+  document.getElementById('el-plant').value=l.plantId;
+  document.getElementById('el-date').value=l.date;
+  document.getElementById('el-note').value=l.note||'';
+  // reset chips
+  document.querySelectorAll('#modal-log .chip').forEach(b=>b.className='chip');
+  editOps.forEach(v=>setChip('#el-ops-group',v,'sel-blue'));
+  editFert.forEach(v=>setChip('#el-fert-group',v,'sel-purple'));
+  editSt.forEach(v=>{
+    const cls=(['状态正常','开花了','新芽冒出'].includes(v)?'sel-green':['叶片发黄','叶片发软','掉叶'].includes(v)?'sel-amber':'sel-red');
+    setChip('#el-st-group',v,cls);
+  });
+  if(editWeather)setChipSingle('ew',editWeather);
+  if(editTemp)setChipSingle('et',editTemp);
+  openModal('modal-log');
+}
+
+function setChip(grpSel,v,cls){
+  const btn=[...document.querySelectorAll(grpSel+' .chip')].find(b=>b.dataset.v===v);
+  if(btn)btn.className='chip '+cls;
+}
+function setChipSingle(grp,v){
+  const btn=[...document.querySelectorAll(`[data-single="${grp}"]`)].find(b=>b.dataset.v===v);
+  if(btn)btn.className='chip '+(btn.dataset.cls||'sel-blue');
+}
+
+async function saveLogEdit(){
+  const id=document.getElementById('el-id').value;
+  const idx=logs.findIndex(l=>l.id===id);if(idx<0)return;
+  logs[idx]={...logs[idx],plantId:document.getElementById('el-plant').value,date:document.getElementById('el-date').value,ops:[...editOps],weather:editWeather,temp:editTemp,ferts:[...editFert],statuses:[...editSt],note:document.getElementById('el-note').value.trim()};
+  const ok=await persist();
+  if(ok){closeModal('modal-log');renderHistory();toast('save-msg','记录已更新 ✓',true);}
+  else toast('save-msg','保存失败',false);
+}
+
+function setFilter(btn,f){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');curFilter=f;renderHistory();
+}
+function onSearch(v){searchKw=v.trim();document.getElementById('search-clear').classList.toggle('show',searchKw.length>0);renderHistory();}
+function clearSearch(){document.getElementById('search-input').value='';searchKw='';document.getElementById('search-clear').classList.remove('show');renderHistory();}
+function hl(t,kw){if(!kw)return t;return t.replace(new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),m=>`<mark>${m}</mark>`);}
+
+function renderHistory(){
+  const el=document.getElementById('history-list'),rc=document.getElementById('rc');
+  let list=curFilter==='all'?[...logs]:logs.filter(l=>l.plantId===curFilter);
+  if(searchKw)list=list.filter(l=>{
+    const p=plants.find(x=>x.id===l.plantId);
+    return[p?p.name:'',l.ops.join(' '),(l.ferts||[]).join(' '),l.statuses.join(' '),l.weather||'',l.temp||'',l.note||'',l.date].join(' ').toLowerCase().includes(searchKw.toLowerCase());
+  });
+  rc.textContent=(searchKw||curFilter!=='all')?`找到 ${list.length} 条记录`:'';
+  if(!list.length){el.innerHTML=`<div class="empty"><i class="ti ti-notes"></i>${searchKw?'没有匹配的记录':'还没有记录'}</div>`;return;}
+  el.innerHTML=list.map(l=>{
+    const p=plants.find(x=>x.id===l.plantId),pname=p?p.name:'未知';
+    const hasAlert=l.statuses.some(s=>['叶片发黄','叶片发软','焦尖焦边','掉叶','化水腐烂','发现虫子'].includes(s));
+    const opTags=l.ops.map(o=>`<span class="tag ${o==='浇水'||o==='淋雨'?'water':o==='施肥'?'fert':o==='换盆换土'?'repot':'obs'}">${hl(o,searchKw)}</span>`).join('');
+    const fertTags=(l.ferts||[]).map(f=>`<span class="tag ftype">${hl(f,searchKw)}</span>`).join('');
+    const stTags=l.statuses.map(s=>`<span class="tag ${['状态正常','开花了','新芽冒出'].includes(s)?'good':['叶片发黄','叶片发软','焦尖焦边','掉叶','化水腐烂','发现虫子'].includes(s)?'alert':'obs'}">${hl(s,searchKw)}</span>`).join('');
+    const wTag=l.weather?`<span class="tag weather">${hl(l.weather,searchKw)}</span>`:'';
+    const tTag=l.temp?`<span class="tag weather">${hl(l.temp,searchKw)}</span>`:'';
+    return `<div class="entry">
+      <div class="entry-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:7px;height:7px;border-radius:50%;background:${hasAlert?'#E24B4A':'#639922'}"></div>
+          <span style="font-size:13px;font-weight:500">${hl(pname,searchKw)}</span>
+          <span style="font-size:11px;color:#aaa">${l.date}</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn sm edit" onclick="openEditLog('${l.id}')"><i class="ti ti-pencil" style="font-size:11px;margin-right:2px"></i>编辑</button>
+          <button class="btn sm danger" onclick="deleteLog('${l.id}')">删除</button>
+        </div>
+      </div>
+      <div style="margin-bottom:4px">${opTags}${wTag}${tTag}</div>
+      ${fertTags?`<div style="margin-bottom:4px">${fertTags}</div>`:''}
+      ${stTags?`<div style="margin-bottom:4px">${stTags}</div>`:''}
+      ${l.note?`<div style="font-size:12px;color:#888;padding-left:15px">${hl(l.note,searchKw)}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// 植物档案
+async function addPlant(){
+  const name=document.getElementById('np-name').value.trim();
+  if(!name){toast('plant-msg','请填写植物名称',false);return;}
+  const family=document.getElementById('np-family').value.trim()||guessTaxonomy(name);
+  plants.push({id:Date.now().toString(),name,type:document.getElementById('np-type').value,family,soil:document.getElementById('np-soil').value.trim(),pot:document.getElementById('np-pot').value.trim(),since:document.getElementById('np-date').value});
+  const ok=await persist();
+  if(ok){document.getElementById('np-name').value='';document.getElementById('np-family').value='';document.getElementById('np-family').dataset.auto='1';document.getElementById('np-soil').value='';document.getElementById('np-pot').value='';toast('plant-msg','已添加 '+name+' ✓',true);refreshSelects();renderPlants();}
+  else{plants.pop();toast('plant-msg','保存失败，请重试',false);}
+}
+
+async function delPlant(id){plants=plants.filter(p=>p.id!==id);logs=logs.filter(l=>l.plantId!==id);await persist();refreshSelects();renderPlants();renderHistory();}
+
+function openEditPlant(id){
+  const p=plants.find(x=>x.id===id);if(!p)return;
+  document.getElementById('ep-id').value=id;
+  document.getElementById('ep-name').value=p.name;
+  document.getElementById('ep-type').value=p.type;
+  document.getElementById('ep-family').value=p.family||guessTaxonomy(p.name)||'';
+  document.getElementById('ep-family').dataset.auto=p.family?'0':'1';
+  document.getElementById('ep-soil').value=p.soil||'';
+  document.getElementById('ep-pot').value=p.pot||'';
+  document.getElementById('ep-since').value=p.since||'';
+  openModal('modal-plant');
+}
+
+async function savePlantEdit(){
+  const id=document.getElementById('ep-id').value;
+  const idx=plants.findIndex(p=>p.id===id);if(idx<0)return;
+  const name=document.getElementById('ep-name').value.trim();
+  if(!name){alert('植物名称不能为空');return;}
+  const family=document.getElementById('ep-family').value.trim()||guessTaxonomy(name);
+  plants[idx]={...plants[idx],name,type:document.getElementById('ep-type').value,family,soil:document.getElementById('ep-soil').value.trim(),pot:document.getElementById('ep-pot').value.trim(),since:document.getElementById('ep-since').value};
+  const ok=await persist();
+  if(ok){closeModal('modal-plant');refreshSelects();renderPlants();toast('plant-msg','已更新 ✓',true);}
+  else toast('plant-msg','保存失败',false);
+}
+
+function renderPlants(){
+  const el=document.getElementById('plants-list');
+  if(!plants.length){el.innerHTML='<div class="empty"><i class="ti ti-plant-2"></i>还没有植物，在上方添加第一棵</div>';return;}
+  el.innerHTML=plants.map(p=>`<div class="plant-row">
+    <div style="display:flex;gap:10px">
+      <div style="width:8px;height:8px;border-radius:50%;background:#639922;margin-top:5px;flex-shrink:0"></div>
+      <div>
+        <div style="font-weight:500;font-size:14px">${p.name}<span style="font-size:11px;color:#888;margin-left:6px;font-weight:400">${p.type}</span></div>
+        ${p.family||guessTaxonomy(p.name)?`<div style="font-size:11px;color:#3B6D11">科属：${p.family||guessTaxonomy(p.name)}</div>`:''}
+        ${p.since?`<div style="font-size:11px;color:#888">养育自 ${p.since}</div>`:''}
+        ${p.soil?`<div style="font-size:11px;color:#888">土：${p.soil}${p.pot?' · 盆：'+p.pot:''}</div>`:''}
+      </div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn sm edit" onclick="openEditPlant('${p.id}')"><i class="ti ti-pencil" style="font-size:11px;margin-right:2px"></i>编辑</button>
+      <button class="btn sm danger" onclick="delPlant('${p.id}')">删除</button>
+    </div>
+  </div>`).join('');
+}
+
+function openModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+
+// 导出
+function exportCSV(){
+  if(!logs.length){toast('export-msg','还没有记录',false);return;}
+  const rows=[['日期','植物','类型','科属','操作','天气','温度','施肥种类','状态','备注']];
+  logs.forEach(l=>{
+    const p=plants.find(x=>x.id===l.plantId);
+    rows.push([l.date,p?p.name:'未知',p?p.type:'',p?(p.family||guessTaxonomy(p.name)):'',l.ops.join('、'),l.weather||'',l.temp||'',(l.ferts||[]).join('、'),l.statuses.join('、'),l.note||'']);
+  });
+  const csv='\uFEFF'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  dl('养护日志_'+td()+'.csv',csv,'text/csv;charset=utf-8');
+  toast('export-msg','CSV 已下载 ✓',true);
+}
+function exportJSON(){
+  if(!plants.length&&!logs.length){toast('export-msg','还没有任何数据',false);return;}
+  dl('养花日志备份_'+td()+'.json',JSON.stringify({version:1,exported:new Date().toISOString(),plants,logs},null,2),'application/json');
+  toast('export-msg','备份已下载 ✓',true);
+}
+function importJSON(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.plants||!data.logs)throw new Error('格式错误');
+      plants=data.plants;logs=data.logs;
+      const ok=await persist();
+      if(ok){refreshSelects();renderPlants();renderHistory();toast('export-msg',`已恢复 ${plants.length} 株植物、${logs.length} 条记录 ✓`,true);}
+      else toast('export-msg','恢复失败',false);
+    }catch(err){toast('export-msg','文件格式有误',false);}
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+function dl(name,content,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function td(){return new Date().toISOString().slice(0,10).replace(/-/g,'');}
+
+function genPrompt(){
+  const pid=document.getElementById('prompt-plant').value,p=plants.find(x=>x.id===pid);
+  if(!p){alert('请先添加植物');return;}
+  const symptom=document.getElementById('prompt-symptom').value.trim();
+  if(!symptom){alert('请填写当前症状');return;}
+  const days=parseInt(document.getElementById('prompt-days').value);
+  const cutoff=new Date(Date.now()-days*86400000).toISOString().slice(0,10);
+  const recent=logs.filter(l=>l.plantId===pid&&l.date>=cutoff).sort((a,b)=>a.date>b.date?1:-1);
+  const opsLog=recent.length?'\n\n最近养护记录：\n'+recent.map(l=>{
+    const parts=[];
+    if(l.ops.length)parts.push(l.ops.join('、'));
+    if(l.weather)parts.push('天气：'+l.weather);
+    if(l.temp)parts.push('温度：'+l.temp);
+    if(l.ferts&&l.ferts.length)parts.push('施肥：'+(l.ferts.join('、')));
+    if(l.statuses.length)parts.push('状态：'+l.statuses.join('、'));
+    if(l.note)parts.push(l.note);
+    return `${l.date}  ${parts.join(' | ')}`;
+  }).join('\n'):'\n\n近期暂无养护操作记录。';
+  const txt=`我是养花纯新手，在浙江室外南阳台养【${p.name}】（${p.type}${p.family||guessTaxonomy(p.name)?'，'+(p.family||guessTaxonomy(p.name)):''}${p.since?'，养育自'+p.since:''}）。\n土：${p.soil||'未记录'}，盆：${p.pot||'未记录'}，阳台通风好。\n\n当前症状：${symptom}${opsLog}\n\n请严格按顺序排查：浇水淋雨 → 光照 → 盆土透气 → 虫害病菌 → 温度温差 → 施肥\n全程大白话，不要专业术语，输出：\n① 最可能的1-2个核心原因\n② 现在立刻要做的事（分步骤）\n③ 以后如何预防复发`;
+  document.getElementById('prompt-text').textContent=txt;
+  document.getElementById('prompt-out').style.display='block';
+}
+function copyPrompt(){navigator.clipboard.writeText(document.getElementById('prompt-text').textContent).then(()=>toast('copy-msg','已复制 ✓',true));}
+
+function sw(name,btn){
+  ['log','history','prompt','plants'].forEach(t=>document.getElementById('tab-'+t).style.display=t===name?'block':'none');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(name==='history')renderHistory();
+}
+
+const TT={};
+function toast(id,txt,ok){
+  const el=document.getElementById(id);el.textContent=txt;el.className='toast '+(ok?'ok':'err');
+  clearTimeout(TT[id]);TT[id]=setTimeout(()=>el.textContent='',2500);
+}
+
+load();
+</script>
